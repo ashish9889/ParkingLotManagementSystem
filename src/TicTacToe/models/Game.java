@@ -47,6 +47,16 @@ public class Game {
         return  GameState.IN_PROGRESS;
     }
 
+    public void undo() {
+        if(moves.size() > 0){
+            Move lastMove = moves.get(moves.size()-1);
+            //Reset the nextPlayerIndex to last player index
+            lastMove.getCell().undoCell();
+            moves.remove(moves.size()-1);
+        }
+
+    }
+
     public static class Builder {
         private int dimension ;
         private List<Player> players;

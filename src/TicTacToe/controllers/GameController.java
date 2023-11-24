@@ -40,6 +40,7 @@ public class GameController {
         List<Player> players = List.of(player2, player1);
         List<WinningStrategy> winningStrategies = null;
         Game game = GameController.startGame(3, players, winningStrategies);
+
         displayBoard(game);
     }
 
@@ -60,7 +61,7 @@ public class GameController {
     }
 
     public void undo(Game game){
-
+        game.undo();
     }
 
 }

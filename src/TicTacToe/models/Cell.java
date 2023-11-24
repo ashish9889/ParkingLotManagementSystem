@@ -44,4 +44,9 @@ public class Cell {
     public void setCellState(CellState cellState) {
         this.cellState = cellState;
     }
+
+    public void undoCell() {
+        this.setCellState(CellState.EMPTY);
+        this.setPlayer(null);
+    }
 }
