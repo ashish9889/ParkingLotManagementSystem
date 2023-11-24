@@ -36,6 +36,17 @@ public class Game {
     public static Builder getBuilder(){
         return new Builder();
     }
+
+    public GameState checkCurrentState() {
+        for (WinningStrategy winningStrategy : this.getWinningStrategies()){
+            GameState currState = winningStrategy.checkWin();
+            if (currState.equals(GameState.SUCCESS) || currState.equals(GameState.DRAW)) {
+                return currState;
+            }
+        }
+        return  GameState.IN_PROGRESS;
+    }
+
     public static class Builder {
         private int dimension ;
         private List<Player> players;
@@ -70,7 +81,7 @@ public class Game {
         private void validateBotCount() throws BotCountException {
             int botCount = 0;
             for(Player p : players){
-                if(p.getPlayerType().equals(PlayerType.BOT)){
+                if(p.getPlayerType() != null && p.getPlayerType().equals(PlayerType.BOT)){
                     botCount += 1;
                 }
             }

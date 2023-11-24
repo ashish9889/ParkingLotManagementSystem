@@ -2,11 +2,11 @@ package producerConsumerSema;
 
 import java.util.concurrent.Semaphore;
 
-public class  faProducer implements Runnable{
+public class Producer implements Runnable{
     private Store store;
     private Semaphore prodSema;
     private Semaphore consSema;
-    Producer(Store st, Semaphore prodSema, Semaphore consSema) {
+    public Producer(Store st, Semaphore prodSema, Semaphore consSema) {
         this.store = st;
         this.prodSema = prodSema;
         this.consSema = consSema;

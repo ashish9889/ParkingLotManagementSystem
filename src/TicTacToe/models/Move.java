@@ -1,5 +1,7 @@
 package TicTacToe.models;
 
+import TicTacToe.exceptions.CellStateNotValidException;
+
 public class Move {
     private Cell cell;
     private Player player;
@@ -18,5 +20,12 @@ public class Move {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public boolean isValid()  {
+        if(this.getCell() == null || !this.getCell().getCellState().equals(CellState.EMPTY)){
+            return false;
+        }
+        return true;
     }
 }
