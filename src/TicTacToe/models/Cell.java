@@ -49,4 +49,8 @@ public class Cell {
         this.setCellState(CellState.EMPTY);
         this.setPlayer(null);
     }
+
+    public boolean isValidForMove() {
+        return this.getCellState().equals(CellState.EMPTY);
+    }
 }

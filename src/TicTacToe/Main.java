@@ -2,36 +2,36 @@ package TicTacToe;
 
 import TicTacToe.controllers.GameController;
 import TicTacToe.exceptions.BotCountException;
+import TicTacToe.exceptions.InvalidPlayersInputException;
 import TicTacToe.exceptions.PlayerCountDimensionMismatchException;
 import TicTacToe.exceptions.SymbolCountException;
-import TicTacToe.models.Cell;
-import TicTacToe.models.Game;
-import TicTacToe.models.GameState;
-import TicTacToe.models.Move;
+import TicTacToe.models.*;
+import TicTacToe.strategies.winningStrategies.OrderOneWinningStrategy;
+import TicTacToe.strategies.winningStrategies.WinningStrategy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws BotCountException, SymbolCountException, PlayerCountDimensionMismatchException {
+    public static void main(String[] args) throws BotCountException, SymbolCountException, PlayerCountDimensionMismatchException, InvalidPlayersInputException {
         GameController gameController = new GameController();
-        Game game = gameController.startGame(3 , new ArrayList<>(), new ArrayList<>());
+
+        Player ashish = Player.builder().setId(1).setPlayerType(PlayerType.HUMAN).setName("Ashish").setSymbol(new Symbol('#')).build();
+        Player bot = Player.builder().setId(2).setPlayerType(PlayerType.BOT).setName("Pluto").setSymbol(new Symbol('O')).build();
+
+        Game game = gameController.startGame(3 , Arrays.asList(ashish, bot), new OrderOneWinningStrategy(3));
         System.out.println("Game is Starting");
 //        Game game = new Game();
-        Move move = null;
-        Cell cell = null;
-        Scanner scanner = new Scanner(System.in);
         while(gameController.checkState(game).equals(GameState.IN_PROGRESS)){
             gameController.displayBoard(game);
-            move = new Move();
-            move.setPlayer(game.getPlayers().get(game.getNextMovePlayerIndex()));
-            move.setCell(getInputCell(scanner));
-            gameController.makeMove(game, move);
+            gameController.makeMove(game);
             // do undo
+            gameController.undo(game);
         }
 
         if(gameController.checkState(game).equals(GameState.SUCCESS)){
-            System.out.println("Winner is some player");
+            System.out.println("Winner is "+game.getWinner());
         } else if (gameController.checkState(game).equals(GameState.DRAW)){
             System.out.println("Game is Drawn");
         }

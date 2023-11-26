@@ -1,6 +1,10 @@
 package TicTacToe.models;
 
+import TicTacToe.controllers.GameController;
 import TicTacToe.exceptions.InvalidPlayersInputException;
+
+import java.util.List;
+import java.util.Scanner;
 
 public class Player {
     private String name;
@@ -43,6 +47,40 @@ public class Player {
     public static Builder builder(){
         return new Builder();
     }
+
+    public Move makeMove(Board board) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(this.getName() +"'s turn : ");
+        //board.display();
+        System.out.print("Please select row : ");
+        int row = scanner.nextInt();
+        System.out.print("Please select column : ");
+        int col = scanner.nextInt();
+
+        Cell cell = board.getCells().get(row).get(col);
+        if(cell == null || !cell.isValidForMove()){
+            System.out.println("Invalid cell selected for move, kindly retry!");
+            this.makeMove(board);
+        }
+
+        cell.setPlayer(this);
+        cell.setCellState(CellState.FILLED);
+        return new Move(cell, this);
+    }
+
+    public void undo(Game game) {
+        System.out.println("Do you want to undo last Move : Yes/No ");
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+        if(input.equalsIgnoreCase("yes")) {
+            Move lastMove = game.getMoves().get(game.getMoves().size() - 1);
+            int lastPlayerIndex = game.getPlayers().indexOf(lastMove.getPlayer());
+            lastMove.getCell().undoCell();
+            game.getWinningStrategy().undo(lastMove, game.getBoard());
+            game.setNextMovePlayerIndex(lastPlayerIndex);
+        }
+    }
+
     public static class Builder{
         private String name;
         private int id;
@@ -89,6 +127,7 @@ public class Player {
             if(this.getSymbol() == null || this.getPlayerType() == null){
                 throw new InvalidPlayersInputException("Inputs for players are not valid!");
             }
+
             Player player = new Player();
             player.setId(this.getId());
             player.setPlayerType(this.getPlayerType());

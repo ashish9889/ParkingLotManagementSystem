@@ -29,6 +29,7 @@ public class Board {
     }
 
     public void display(){
+        System.out.println("-- Current Board State -- ");
         for(int i = 0; i < this.getSize(); i++){
             for(int j = 0; j < this.getSize(); j++){
                 if(this.getCells().get(i).get(j).getCellState().equals(CellState.EMPTY))

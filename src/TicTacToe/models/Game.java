@@ -5,10 +5,8 @@ import TicTacToe.exceptions.PlayerCountDimensionMismatchException;
 import TicTacToe.exceptions.SymbolCountException;
 import TicTacToe.strategies.winningStrategies.WinningStrategy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import java.util.*;
 
 public class Game {
     private Board board;
@@ -17,16 +15,16 @@ public class Game {
     private GameState gameState;
     private int nextMovePlayerIndex;
     private Player winner;
-    private List<WinningStrategy> winningStrategies;
+    private WinningStrategy winningStrategy;
     public Board getBoard() {
         return board;
     }
 
     private Game(int dimension,
                  List<Player> players,
-                 List<WinningStrategy> winningStrategies){
+                 WinningStrategy winningStrategy){
         this.players = players;
-        this.winningStrategies = winningStrategies;
+        this.winningStrategy = winningStrategy;
         this.moves = new ArrayList<>();
         this.nextMovePlayerIndex = 0;
         this.gameState = GameState.IN_PROGRESS;
@@ -37,30 +35,33 @@ public class Game {
         return new Builder();
     }
 
-    public GameState checkCurrentState() {
-        for (WinningStrategy winningStrategy : this.getWinningStrategies()){
-            GameState currState = winningStrategy.checkWin();
-            if (currState.equals(GameState.SUCCESS) || currState.equals(GameState.DRAW)) {
-                return currState;
-            }
-        }
-        return  GameState.IN_PROGRESS;
+    public void undo() {
+        Player currPlayer = players.get(nextMovePlayerIndex);
+        currPlayer.undo(this);
     }
 
-    public void undo() {
-        if(moves.size() > 0){
-            Move lastMove = moves.get(moves.size()-1);
-            //Reset the nextPlayerIndex to last player index
-            lastMove.getCell().undoCell();
-            moves.remove(moves.size()-1);
+    public void makeMove() {
+        Player currPlayer = players.get(nextMovePlayerIndex);
+        Move move = currPlayer.makeMove(board);
+        moves.add(move);
+
+        if(winningStrategy.checkWin(move, board)){
+            this.setGameState(GameState.SUCCESS);
+            this.setWinner(currPlayer);
+            return;
+        }
+        if(moves.size() == board.getSize() * board.getSize()){
+            this.setGameState(GameState.DRAW);
+            return;
         }
 
+        nextMovePlayerIndex = (nextMovePlayerIndex + 1 ) % players.size();
     }
 
     public static class Builder {
         private int dimension ;
         private List<Player> players;
-        private List<WinningStrategy> winningStrategies;
+        private WinningStrategy winningStrategy;
 
         public Builder setDimension(int dimension) {
             this.dimension = dimension;
@@ -72,21 +73,14 @@ public class Game {
             return this;
         }
 
-        public Builder setWinningStrategies(List<WinningStrategy> winningStrategies) {
-            this.winningStrategies = winningStrategies;
+        public Builder setWinningStrategy(WinningStrategy winningStrategy) {
+            this.winningStrategy = winningStrategy;
             return this;
-
         }
 
         public Builder addPlayer(Player player){
             this.players.add(player);
             return this;
-        }
-
-        public Builder addWinningStrategy(WinningStrategy winningStrategy){
-            this.winningStrategies.add(winningStrategy);
-            return this;
-
         }
         private void validateBotCount() throws BotCountException {
             int botCount = 0;
@@ -101,8 +95,6 @@ public class Game {
         }
 
         private void validatePlayersCount() throws PlayerCountDimensionMismatchException {
-
-
             if(players.size() != dimension - 1){
                 throw new PlayerCountDimensionMismatchException();
             }
@@ -137,7 +129,7 @@ public class Game {
             return new Game(
                     this.dimension,
                     this.players,
-                    this.winningStrategies
+                    this.winningStrategy
             );
         }
     }
@@ -185,14 +177,11 @@ public class Game {
         this.winner = winner;
     }
 
-    public List<WinningStrategy> getWinningStrategies() {
-        return winningStrategies;
+    public WinningStrategy getWinningStrategy() {
+        return winningStrategy;
     }
 
-    public void setWinningStrategies(List<WinningStrategy> winningStrategies) {
-        this.winningStrategies = winningStrategies;
+    public void setWinningStrategy(WinningStrategy winningStrategy) {
+        this.winningStrategy = winningStrategy;
     }
-
-
-
 }
